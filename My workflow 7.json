@@ -1,0 +1,253 @@
+{
+  "name": "My workflow 7",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1aJMd6aQMl5LNsbVe0pp6v9R--qF0dmzHc4bOQ_IEUWI",
+          "mode": "list",
+          "cachedResultName": "order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aJMd6aQMl5LNsbVe0pp6v9R--qF0dmzHc4bOQ_IEUWI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aJMd6aQMl5LNsbVe0pp6v9R--qF0dmzHc4bOQ_IEUWI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('On form submission').item.json.Name }}",
+            "Order": "={{ $('On form submission').item.json.Order }}",
+            "Price": "={{ $('On form submission').item.json.Price }}"
+          },
+          "matchingColumns": [
+            "Name"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order",
+              "displayName": "Order",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        320,
+        64
+      ],
+      "id": "e7d35b01-694e-46f3-976c-d7a086f0d8e9",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Hkvo6tmEDu9nduMN",
+          "name": "1211"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Restaurant order",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "placeholder": "Your Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Order",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "burger"
+                  },
+                  {
+                    "option": "shawrma"
+                  },
+                  {
+                    "option": "potato"
+                  },
+                  {
+                    "option": "water"
+                  },
+                  {
+                    "option": "juice"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Price",
+              "fieldType": "number",
+              "placeholder": "Price",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -336,
+        -16
+      ],
+      "id": "27b709f4-ad51-4556-ba48-9d72dc5188a5",
+      "name": "On form submission",
+      "webhookId": "520730e6-b0fd-463a-bef1-9d1334eb7909"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        112
+      ],
+      "id": "061f7de9-fd01-400d-b002-38efe85cbfba",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "X6dHsTNYoNMppgT3",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "you will got a data from the form , and send it to the google sheet i have choose ,  and send an email with the data",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -64,
+        -80
+      ],
+      "id": "20f27bbd-9b4f-4b60-ac24-dcf74b377c60",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sendTo": "mostafatamer1211@gmail.com",
+        "subject": "First order in my restaurant",
+        "emailType": "text",
+        "message": "=Hello Tamer , \n\nThe order is : {{ $('On form submission').item.json.Order }}\n\n\n and from : {{ $('On form submission').item.json.Name }}\n\n\nand the price is :{{ $('On form submission').item.json.Price }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        -96
+      ],
+      "id": "388a04eb-a9e4-4ced-88d9-b7a3ebaa5fe8",
+      "name": "Send a message",
+      "webhookId": "2dcb6b2e-6eb4-4090-8fbf-0e16e3461bf1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FqxsJda0PrNBIBDc",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1bd86728-119e-4157-b321-545f34e783a9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0d13edcee91f26a7ac69805d19a8fbd26d811343f2f13648e9dccff1caaca05c"
+  },
+  "id": "Kd2cBfsNgFnZWbPB",
+  "tags": []
+}
