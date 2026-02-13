@@ -1,37 +1,92 @@
 {
-  "name": "My workflow 7",
   "nodes": [
     {
       "parameters": {
-        "operation": "appendOrUpdate",
+        "httpMethod": "POST",
+        "path": "2c46a00f-2b64-4032-9d93-0ef6399a65b9",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -736,
+        -192
+      ],
+      "id": "dc5fe0f3-0fad-4c48-bf9a-411b3ce15fb1",
+      "name": "Webhook",
+      "webhookId": "2c46a00f-2b64-4032-9d93-0ef6399a65b9"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.customer.email }}",
+        "subject": "=Order Confirmation ",
+        "emailType": "text",
+        "message": "=Hello {{ $item(0).$node[\"Webhook\"].json.body.customer.name }},\n\nWe have received your order!\n\n📦 Items to Prepare:\n{{ $item(0).$node[\"Webhook\"].json.body.items.map(item => \"• \" + item.name + \" (\" + item.selectedOption + \")\").join(\"\\n\") }}\n\n💰 Total Amount: ${{ $item(0).$node[\"Webhook\"].json.body.total }}\n🆔 Order ID: {{ $item(0).$node[\"Webhook\"].json.body.orderId }}\n\nThank you for choosing Bite Hub!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        208
+      ],
+      "id": "fe39067a-552a-4634-a99c-19ce3c5afc19",
+      "name": "Send a message",
+      "webhookId": "4ee0e6c8-b149-4c79-8a6f-bae7d446bd3d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "m3ebwlI24cDxx71a",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "User interface",
+        "height": 448,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -912,
+        -304
+      ],
+      "typeVersion": 1,
+      "id": "da666b98-04c6-4407-b058-8d10ac398276",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "update",
         "documentId": {
           "__rl": true,
-          "value": "1aJMd6aQMl5LNsbVe0pp6v9R--qF0dmzHc4bOQ_IEUWI",
+          "value": "17TFmpaORPmRvIOdZ_nFztLx8AEq2qQkeJ3Xa4NY9vZ4",
           "mode": "list",
-          "cachedResultName": "order",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aJMd6aQMl5LNsbVe0pp6v9R--qF0dmzHc4bOQ_IEUWI/edit?usp=drivesdk"
+          "cachedResultName": "restaurant_stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17TFmpaORPmRvIOdZ_nFztLx8AEq2qQkeJ3Xa4NY9vZ4/edit?usp=drivesdk"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1aJMd6aQMl5LNsbVe0pp6v9R--qF0dmzHc4bOQ_IEUWI/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17TFmpaORPmRvIOdZ_nFztLx8AEq2qQkeJ3Xa4NY9vZ4/edit#gid=0"
         },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "Name": "={{ $('On form submission').item.json.Name }}",
-            "Order": "={{ $('On form submission').item.json.Order }}",
-            "Price": "={{ $('On form submission').item.json.Price }}"
+            "item": "={{ $('Get row(s) in sheet').item.json.item }}",
+            "quantity ": "={{ $('Get row(s) in sheet').item.json['quantity '] - $('Code in Python1').item.json.Item_Quantity }}"
           },
           "matchingColumns": [
-            "Name"
+            "item"
           ],
           "schema": [
             {
-              "id": "Name",
-              "displayName": "Name",
+              "id": "item",
+              "displayName": "item",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -40,8 +95,8 @@
               "removed": false
             },
             {
-              "id": "Order",
-              "displayName": "Order",
+              "id": "quantity ",
+              "displayName": "quantity ",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -49,13 +104,25 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "Price",
-              "displayName": "Price",
+              "id": "Unit",
+              "displayName": "Unit",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
             }
           ],
           "attemptToConvertTypes": false,
@@ -66,165 +133,374 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        320,
-        64
+        1248,
+        32
       ],
-      "id": "e7d35b01-694e-46f3-976c-d7a086f0d8e9",
-      "name": "Append or update row in sheet",
+      "id": "2b96d037-0b4b-4950-9ba6-df68f2cda0bc",
+      "name": "Update row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "Hkvo6tmEDu9nduMN",
-          "name": "1211"
+          "id": "DbPgd0hblTguj2RQ",
+          "name": "Google Sheets account"
         }
       }
     },
     {
       "parameters": {
-        "formTitle": "Restaurant order",
-        "formFields": {
+        "content": "Restaurant manage",
+        "height": 448,
+        "width": 1248
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -384,
+        -304
+      ],
+      "typeVersion": 1,
+      "id": "006197e4-4fbf-435e-af0c-24d17e11852b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a restaurant order formatting assistant. \n\nYour task is to take raw JSON order data and convert it into a beautiful, clean summary for a kitchen staff member. \n\nRULES:\n1. Start exactly with the text \"🚀 NEW ORDER RECEIVED!\".\n2. List the items exactly as they appear in the JSON using the format: \"• Item Name (Selected Option)\".\n3. Do NOT include any introductory or concluding text. Output ONLY the formatted order.\n4. Do NOT use markdown bolding (like **) or italics (like *) as this can cause errors in some messaging apps. Use the layout provided in the example.\n\nExample Output Format:\n\n📦 Items to Prepare:\n• [Item Name] ([selectedOption])\n• [Item Name] ([selectedOption])\n• order ID\n\nthe data is :\n{{ $json.result.text }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -128,
+        -192
+      ],
+      "id": "6013a80e-de71-4a1c-9f95-20a96eb3b35d",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "chatId": "865283266",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        -192
+      ],
+      "id": "ac8fb300-10bf-46a3-96aa-6abab93b55f2",
+      "name": "Send a text message1",
+      "webhookId": "6b62282b-1b9b-4201-8944-b7a593b433e5",
+      "credentials": {
+        "telegramApi": {
+          "id": "W2SEt4RKKpNLHwJx",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "# Language: Python | Mode: Run Once for All Items\nresults = []\n\nfor item in _items:\n    data = item.get('json', {})\n    # Find text in data['result']['text'] (Common n8n LLM path)\n    text = data.get('text') or data.get('result', {}).get('text')\n    \n    if not text or \"Items to Prepare:\" not in text:\n        continue\n\n    # Extract the items section\n    items_section = text.split(\"Items to Prepare:\")[1].split(\"Total Amount:\")[0]\n    lines = items_section.strip().split('\\n')\n    \n    for line in lines:\n        # Clean line: remove bullet points and emojis\n        clean = line.strip().lstrip('•').lstrip('*').strip()\n        \n        if clean:\n            # 1. Extract Quantity (digits at the end or after a colon)\n            qty_digits = \"\".join(filter(str.isdigit, clean.split(':')[-1])) if ':' in clean else \"\".join(filter(str.isdigit, clean))\n            quantity = int(qty_digits) if qty_digits else 1\n            \n            # 2. Extract Base Name (Remove options in parentheses and quantities)\n            # Example: \"Gourmet Burger (Pickles): 2\" -> \"Gourmet Burger\"\n            base_name = clean.split('(')[0].split(':')[0].strip()\n            \n            results.append({\n                \"json\": {\n                    \"Item_Name\": base_name, # Search Google Sheets for THIS\n                    \"Full_Description\": clean, # Use THIS for the Telegram message\n                    \"Item_Quantity\": quantity,\n                }\n            })\n\nreturn results"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        -192
+      ],
+      "id": "53b1aa0e-d8fe-4468-9e2b-f17abc65d696",
+      "name": "Code in Python1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "17TFmpaORPmRvIOdZ_nFztLx8AEq2qQkeJ3Xa4NY9vZ4",
+          "mode": "list",
+          "cachedResultName": "restaurant_stock",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17TFmpaORPmRvIOdZ_nFztLx8AEq2qQkeJ3Xa4NY9vZ4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17TFmpaORPmRvIOdZ_nFztLx8AEq2qQkeJ3Xa4NY9vZ4/edit#gid=0"
+        },
+        "filtersUI": {
           "values": [
             {
-              "fieldLabel": "Name",
-              "placeholder": "Your Name",
-              "requiredField": true
-            },
-            {
-              "fieldLabel": "Order",
-              "fieldType": "checkbox",
-              "fieldOptions": {
-                "values": [
-                  {
-                    "option": "burger"
-                  },
-                  {
-                    "option": "shawrma"
-                  },
-                  {
-                    "option": "potato"
-                  },
-                  {
-                    "option": "water"
-                  },
-                  {
-                    "option": "juice"
-                  }
-                ]
-              },
-              "requiredField": true
-            },
-            {
-              "fieldLabel": "Price",
-              "fieldType": "number",
-              "placeholder": "Price",
-              "requiredField": true
+              "lookupColumn": "item",
+              "lookupValue": "={{ $json.Full_Description }}"
             }
           ]
         },
         "options": {}
       },
-      "type": "n8n-nodes-base.formTrigger",
-      "typeVersion": 2.3,
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
       "position": [
-        -336,
-        -16
+        544,
+        -192
       ],
-      "id": "27b709f4-ad51-4556-ba48-9d72dc5188a5",
-      "name": "On form submission",
-      "webhookId": "520730e6-b0fd-463a-bef1-9d1334eb7909"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
-      "position": [
-        -64,
-        112
-      ],
-      "id": "061f7de9-fd01-400d-b002-38efe85cbfba",
-      "name": "Google Gemini Chat Model",
+      "id": "88b435b4-5c64-44af-b76f-9d16619f2b74",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
       "credentials": {
-        "googlePalmApi": {
-          "id": "X6dHsTNYoNMppgT3",
-          "name": "Google Gemini(PaLM) Api account"
+        "googleSheetsOAuth2Api": {
+          "id": "DbPgd0hblTguj2RQ",
+          "name": "Google Sheets account"
         }
       }
     },
     {
       "parameters": {
-        "promptType": "define",
-        "text": "you will got a data from the form , and send it to the google sheet i have choose ,  and send an email with the data",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3,
-      "position": [
-        -64,
-        -80
-      ],
-      "id": "20f27bbd-9b4f-4b60-ac24-dcf74b377c60",
-      "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "sendTo": "mostafatamer1211@gmail.com",
-        "subject": "First order in my restaurant",
-        "emailType": "text",
-        "message": "=Hello Tamer , \n\nThe order is : {{ $('On form submission').item.json.Order }}\n\n\n and from : {{ $('On form submission').item.json.Name }}\n\n\nand the price is :{{ $('On form submission').item.json.Price }}",
-        "options": {
+        "chatId": "865283266",
+        "text": "=={{ \"🚀 NEW ORDER RECEIVED!\" }}\n\n👤 Customer: {{ $json.body.customer.name }}\n📞 Phone: {{ $json.body.customer.phone }}\n📧 Email: {{ $json.body.customer.email }}\n\n📦 Items to Prepare:\n{{ $json.body.items.map(item => \"• \" + item.name + \" (\" + item.selectedOption + \")\").join(\"\\n\") }}\n\n💰 Total Amount: ${{ $json.body.total }}\n⏰ Ordered at: {{ $json.body.timestamp }}\n\n🆔 Order ID: {{ $json.body.orderId }}",
+        "additionalFields": {
           "appendAttribution": false
         }
       },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
       "position": [
-        320,
-        -96
+        -352,
+        -192
       ],
-      "id": "388a04eb-a9e4-4ced-88d9-b7a3ebaa5fe8",
-      "name": "Send a message",
-      "webhookId": "2dcb6b2e-6eb4-4090-8fbf-0e16e3461bf1",
+      "id": "ff2f29a6-978c-4564-a88f-47476ce4de99",
+      "name": "Send a text message2",
+      "webhookId": "b7503aac-2f52-416c-8abd-4d9a94d286ca",
+      "credentials": {
+        "telegramApi": {
+          "id": "W2SEt4RKKpNLHwJx",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "34ec821e-4e6f-4e4c-9f1e-3f3337bbaf91",
+              "leftValue": "={{ $json['quantity '] }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        -192
+      ],
+      "id": "9716f7db-c23b-4a39-9cf7-60b76884bbcb",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.customer.email }}",
+        "subject": "Order declined",
+        "emailType": "text",
+        "message": "The order has been diclined",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        400
+      ],
+      "id": "056992c7-4dad-4cf0-9a02-1d3fc1056dae",
+      "name": "Send a message1",
+      "webhookId": "d750705c-6c5c-4284-8670-68f88216ee89",
       "credentials": {
         "gmailOAuth2": {
-          "id": "FqxsJda0PrNBIBDc",
+          "id": "m3ebwlI24cDxx71a",
           "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        960,
+        160
+      ],
+      "id": "5a17e7c9-3bab-4dcf-9e56-10eacc33bfa8",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        960,
+        400
+      ],
+      "id": "284e87dc-425b-4e1b-ba69-0da897dbc8b2",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "content": "send Email",
+        "height": 544,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        896,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "b837234b-a915-439b-adaa-8f2bdcba8d71",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "model": "stepfun/step-3.5-flash:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        16
+      ],
+      "id": "7b927798-5b76-446a-8a0e-f49e48a5b7a2",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "BXvLtwQuwBaiygYJ",
+          "name": "OpenRouter account"
         }
       }
     }
   ],
-  "pinData": {},
   "connections": {
-    "On form submission": {
+    "Webhook": {
       "main": [
         [
           {
-            "node": "AI Agent",
+            "node": "Send a text message2",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Google Gemini Chat Model": {
-      "ai_languageModel": [
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
         [
           {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
+            "node": "Send a text message1",
+            "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "AI Agent": {
+    "Send a text message1": {
       "main": [
         [
           {
-            "node": "Append or update row in sheet",
+            "node": "Code in Python1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message2": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
             "type": "main",
             "index": 0
           },
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
           {
             "node": "Send a message",
             "type": "main",
@@ -233,21 +509,32 @@
         ]
       ]
     },
-    "Append or update row in sheet": {
+    "Aggregate1": {
       "main": [
-        []
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
       ]
     }
   },
-  "active": true,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "1bd86728-119e-4157-b321-545f34e783a9",
+  "pinData": {},
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "0d13edcee91f26a7ac69805d19a8fbd26d811343f2f13648e9dccff1caaca05c"
-  },
-  "id": "Kd2cBfsNgFnZWbPB",
-  "tags": []
+    "instanceId": "6badf329ed162545676a24792a9ad39f8c78501acb9912515144e1c9e4a7600c"
+  }
 }
